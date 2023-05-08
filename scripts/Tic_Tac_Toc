@@ -1,0 +1,112 @@
+
+class Board
+  Winig_Conditions = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [6, 4, 2]].freeze
+  attr_accessor :board
+
+  def initialize
+    @board = Array.new(9, ' ')
+  end
+
+  def display_board
+    puts " #{@board[0]} | #{@board[1]} | #{@board[2]} "
+    puts '-----------'
+    puts " #{@board[3]} | #{@board[4]} | #{@board[5]} "
+    puts '-----------'
+    puts " #{@board[6]} | #{@board[7]} | #{@board[8]} "
+  end
+
+  def win?(player)
+    Winig_Conditions.any? do |condition|
+      condition.all? { |position| @board[position] == player }
+    end
+  end
+
+  def tie?
+    @board.all? { |position| position != ' ' }
+  end
+
+  def game_over?(player)
+    if win?(player)
+      puts "Player #{player} wins"
+      true
+
+    elsif tie?
+      puts "It's a tie"
+      true
+    end
+  end
+
+  def reset
+    @board = Array.new(9, ' ')
+  end
+
+  def available_moves
+    @board.map.with_index { |position, index| index if position == ' ' }.compact
+  end
+
+  def opponent(player)
+    player == 'X' ? 'O' : 'X'
+  end
+
+  def valid_input?(input)
+    input.to_i.between?(0, 8)
+  end
+
+  def valid_move?(input)
+    valid_input?(input) && @board[input.to_i] == ' '
+  end
+
+  def get_input
+    gets.chomp
+  end
+
+  def player_move(player)
+    puts 'Enter a number between 0 and 8'
+    input = get_input
+    if valid_move?(input)
+      @board[input.to_i] = player
+      if game_over?(player)
+        puts 'Game over'
+        return
+      end
+    else
+      puts 'Invalid move'
+      player_move(player)
+    end
+    puts "Player #{opponent(player)}'s turn"
+    play(opponent(player))
+  end
+
+  def play(player)
+    display_board
+    if game_over?(player)
+      puts 'Game over'
+      return
+    end
+    puts "Player #{player}'s turn"
+    player_move(player)
+  end
+
+  def play_again? # rubocop:disable Metrics/MethodLength
+    puts 'Play again? (y/n)'
+    input = get_input
+    case input
+    when 'y'
+      reset
+      play('X')
+    when 'n'
+      puts 'Goodbye'
+    else
+      puts 'Invalid input'
+      play_again?
+    end
+  end
+
+  def play_game
+    play('X')
+    play_again?
+  end
+end
+
+board = Board.new
+board.play_game
